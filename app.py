@@ -4,6 +4,10 @@ import string
 from nltk.corpus import stopwords
 import nltk
 from nltk.stem.porter import PorterStemmer
+from scipy.sparse import csr_matrix  # Updated import to avoid deprecation warning
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 nltk.download('punkt')
 nltk.download('stopwords')
 ps = PorterStemmer()
@@ -33,10 +37,11 @@ def transform_text(text):
 
     return " ".join(y)
 
-tfidf = pickle.load(open('vectorizer.pkl','rb'))
+with open('vectorizer.pkl', 'rb') as file:
+    vectorizer = pickle.load(file)
 model = pickle.load(open('model.pkl','rb'))
 
-st.title("Email/SMS Spam Classifier")
+st.title("Spam Classifier")
 
 input_sms = st.text_area("Enter the message")
 
@@ -45,7 +50,7 @@ if st.button('Predict'):
     # 1. preprocess
     transformed_sms = transform_text(input_sms)
     # 2. vectorize
-    vector_input = tfidf.transform([transformed_sms])
+    vector_input = vectorizer.transform([transformed_sms])
     # 3. predict
     result = model.predict(vector_input)[0]
     # 4. Display
